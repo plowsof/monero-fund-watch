@@ -15,6 +15,7 @@ How i've solved this:
 - use tx-notify from monero-wallet-rpc to run a python script when incoming transactions are received.
 - use a webscraper to check binaryFates recent activity on gitlab.
 - send the tweet.
+- https://twitter.com/WatchFund/
   
 Problems:
 

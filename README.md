@@ -22,3 +22,11 @@ Problems:
 Contributions to ccs proposals are not the only outgoing transactions from the general fund (which cause the false change inputs) so for this script to validate all inputs - these payments need to be disclosed also e.g. "Withdrawing ?xmr from the general fund to purchase server bandwidth."
 
 The webscraping method is a 'hack'. Outgoing transactions should ideally be disclosed in a simple text file somewhere that a script can easily parse
+
+Improvements:
+
+If/when all outgoing transactions are disclosed, then an 'unofficial' monthly transparency report can be tweeted automatically e.g. ' ?xmr in, ?xmr out ' and to see what it was spent on you just have to scroll through the twitter feed.
+
+Like this idea and want to show some support?:
+
+This is a voluntary contribution to the Monero community, however, the machine that is running this script uses 20~watts of power so a few cents donation can literally help 'keep the lights on' :) 

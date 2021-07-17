@@ -12,6 +12,7 @@ import time
 import random
 import string
 import cryptocompare
+from pyvirtualdisplay import Display
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
@@ -31,23 +32,24 @@ access_token_secret ="-"
 
 def scrape_page(txid_compare):
     global binaryFate_url
-    options = Options()
-    options.headless = True
-    driver = webdriver.Firefox(options=options)
-    driver.get(binaryFate_url)
-    timeout = 10
-    try:
+    with Display(visible=False, size=(1200, 1500)):
+        options = Options()
+        options.headless = True
+        driver = webdriver.Firefox(options=options)
+        driver.get(binaryFate_url)
+        timeout = 10
         try:
-            element_present = EC.presence_of_element_located((By.CLASS_NAME, 'event-item'))
-            WebDriverWait(driver, timeout).until(element_present)
-        except TimeoutException:
-            print("Timed out waiting for page to load")
-        fatesPosts = driver.find_elements_by_class_name("event-item")
-        return check_txid(txid_compare,fatesPosts)
-        pass
-    finally:
-        driver.quit()
-        pass
+            try:
+                element_present = EC.presence_of_element_located((By.CLASS_NAME, 'event-item'))
+                WebDriverWait(driver, timeout).until(element_present)
+            except TimeoutException:
+                print("Timed out waiting for page to load")
+            fatesPosts = driver.find_elements_by_class_name("event-item")
+            return check_txid(txid_compare,fatesPosts)
+            pass
+        finally:
+            driver.quit()
+            pass
 
 def check_txid(txid_compare,fatesPosts):
     global ccs_url

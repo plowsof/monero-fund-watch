@@ -30,3 +30,5 @@ If/when all outgoing transactions are disclosed, then an 'unofficial' monthly tr
 # Like this idea and want to show some support?:
 
 This is a voluntary contribution to the Monero community, however, the machine that is running this script uses 20~watts of power so a few cents donation can literally help 'keep the lights on' :) 
+
+XMR Address : 86aSNJwDYC2AshDDvbGgtQ17RWspmKNwNXAqdFiFF2Db91v9PC26uDxffD9ZYfcMjvJpuKJepsQtELAdmXVk85E1DsuL6rG

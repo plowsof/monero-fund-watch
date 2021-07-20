@@ -12,84 +12,75 @@ import time
 import random
 import string
 import cryptocompare
-from pyvirtualdisplay import Display
-from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.options import Options
+import pickle
+import os
+import requests
+from bs4 import BeautifulSoup
+import pprint
 
-
-
+#from pyvirtualdisplay import Display
+import traceback 
 ccs_url = "https://repo.getmonero.org/monero-project/ccs-proposals/-/merge_requests/"
-binaryFate_url = "https://repo.getmonero.org/users/binaryFate/activity"
+binaryFate_url = "https://repo.getmonero.org/users/binaryFate/activity?limit=20&offset=0"
+#binaryFate_url = "https://repo.getmonero.org/users/binaryFate"
 cryptocompare.cryptocompare._set_api_key_parameter("-")
 consumer_key ="-"
 consumer_secret ="-"
 access_token ="-"
 access_token_secret ="-"
+pickled_data = "/var/log/monero/pickled_data.pkl"
+node_url =  'http://127.0.0.1:18084/json_rpc'
+loc_db = "/var/log/monero/general-fund.db"
+tweetFile = "/var/log/monero/tweet"
 
-def scrape_page(txid_compare):
+def logit(sometext):
+    global tweetFile
+    with open(tweetFile, "a+") as f:
+        f.write(str(sometext) + "\n")
+
+def requests_scrape_page():
     global binaryFate_url
-    with Display(visible=False, size=(1200, 1500)):
-        options = Options()
-        options.headless = True
-        driver = webdriver.Firefox(options=options)
-        driver.get(binaryFate_url)
-        timeout = 10
-        try:
-            try:
-                element_present = EC.presence_of_element_located((By.CLASS_NAME, 'event-item'))
-                WebDriverWait(driver, timeout).until(element_present)
-            except TimeoutException:
-                print("Timed out waiting for page to load")
-            fatesPosts = driver.find_elements_by_class_name("event-item")
-            return check_txid(txid_compare,fatesPosts)
-            pass
-        finally:
-            driver.quit()
-            pass
-
-def check_txid(txid_compare,fatesPosts):
     global ccs_url
-    found_txid = 0
-    return_list=[1,2]
-    for post in fatesPosts:
-        if found_txid == 0:
-            text_lines = post.text.splitlines()
-            #print(text_lines)
-            if text_lines[2] == "commented on":
-                #its a comment
-                data_comment = text_lines[7]
-                #check for txid in comment
-                words = data_comment.replace(".","").split(" ")
-                for x in words:
-                    if len(x) == 64:
-                        if x == txid_compare:
-                            #this is most likely a txid
-                            data_txid = x
-                            data_ccsid = text_lines[4].replace("!","")
-                            #trailing space to avoid any connected dots that break the link
-                            actual_ccs = ccs_url+str(data_ccsid)+" " 
-                            data_comment = data_comment.replace(data_txid,actual_ccs)
-                            #print(data_comment)
-                            found_txid = 1
-                            break
-        else:
-            #we found the tx , no need to search further
-            break
-    if found_txid == 0:
-        return_list[0] = 0
-        return return_list
-    else:
-        return_list[0] = 1
-        return_list[1] = data_comment
-        return return_list
+    myDict = {
+    'accept': 'application/json, text/plain, */*',
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36',
+    'x-requested-with': 'XMLHttpRequest'
+    }
+    r=requests.get(binaryFate_url, headers=myDict).text
+    someDict = json.loads(r)
+    soup = BeautifulSoup(someDict['html'], 'html.parser')
+    #print(soup.prettify())
+    strings = soup.find_all(class_='event-body')
+    count = 0
+    for each in strings:
+        count+=1
+        #print("item : " + str(count))
+        comment = each.get_text().strip()
+        ccs = each.parent.find(class_='event-title').a.get_text()
+        #comment = each.parent.find(class_='event-title').a['href']
+        #print(f"data2: {ccs}")
+        #print(f"data3: {comment}")
+        fatesPosts = []
+        for word in comment.replace(".","").split(" "):
+            if len(word) == 64:
+                print("gotem")
+                #this is most likely a txid
+                data_txid = word
+                data_ccsid = ccs.replace("!","")
+                #trailing space to avoid any connected dots that break the link
+                actual_ccs = ccs_url+str(data_ccsid)+" " 
+                data_comment = comment.replace(data_txid,actual_ccs)
+                data = []
+                data.append(data_txid)
+                data.append(data_comment)
+                fatesPosts.append(data)
+                #logit(data_comment)
+    return fatesPosts
 
 def insertData(amount):
     #add to database
-    con = sqlite3.connect('/var/log/monero/general-fund.db')
+    global loc_db
+    con = sqlite3.connect(loc_db)
     cur = con.cursor()
     date_time = getDateTime()
     # Insert a row of data
@@ -118,46 +109,88 @@ def getPrice(crypto,amount):
         raise e
         return ""
 
-
 def checkHeight(tx_id):
+    global pickled_data
+    global node_url
     #loop incase rpc daemon has not started up yet.
     while True:
         try:
-            rpc_connection = AuthServiceProxy(service_url='http://127.0.0.1:18084/json_rpc')
+            rpc_connection = AuthServiceProxy(service_url=node_url)
             params={"account_index":0,
             "txid":str(tx_id)}
             info = rpc_connection.get_transfer_by_txid(params)
             break
         except Exception as e:
-            print(e)
+            logit(e)
             print("Retrying connection in 5 seconds.")
             time.sleep(5)
 
     height = info["transfer"]["height"]
-    if info["transfer"]["height"] != 0:
+    logit(f"height: {height}")
+    if info["transfer"]["height"] == 0:
         raw_amount = info["transfer"]["amount"]
-        memelord = 0
-        if "420" in str(raw_amount) or "69" in str(raw_amount):
-            memelord = 1
-        amount = formatAmount(raw_amount)
-        validateInput(amount,tx_id,memelord)
-        
+        #are we the first transaction? (no pickle file)
+        txData = []
+        txData.append(tx_id)
+        txData.append(raw_amount) 
+        if not os.path.isfile(pickled_data):
+            #we're the master tx
+            txList = []
+            txList.append(txData)       
+            pickle.dump( txList, open( pickled_data, "wb+" ) )
+            #20 minutes
+            logit("All aboard..")
+            time.sleep(10)
+            #load
+            txList = pickle.load( open( pickled_data, "rb" ) )
+            #delete
+            os.remove(pickled_data)
+            logit(f"train leaving the station with {len(txList)} passengers")
+            time.sleep(20)
+            validateInput(txList)
+        else:
+            #append to existing txList
+            txList = pickle.load( open( pickled_data, "rb" ) )
+            txList.append(txData)
+            pickle.dump( txList, open( pickled_data, "wb+" ) )
     else:
         print("New tx in mem pool, waiting for confirmations")
 
 #validate inputs by seeking the txid in binaryFates comments
-def validateInput(amount,tx_id,ml):
-    print("sleep an hour")
-    time.sleep(3600)
-    pull_data = scrape_page(tx_id)
-    if pull_data[0] == 1:
-        #the tx_id was found in binaryFates comments 
-        sendTweet(pull_data[1])
-    else:
-        #normal tweet
-        makeTweet(amount,ml)
-        insertData(amount)
-        saveWallet()
+def validateInput(txList):
+    global tweetFile
+    try:
+        #fatesPosts = scrape_page()
+        fatesPosts = requests_scrape_page()
+        for x in txList:
+            tx_id = x[0]
+            raw_amount = x[1]
+            memelord = 0
+            if "420" in str(raw_amount) or "69" in str(raw_amount):
+                memelord = 1
+            amount = formatAmount(raw_amount)
+            #pull_data = check_txid(tx_id,fatesPosts)
+            found = 0
+            for x in fatesPosts:
+                compare_txid = x[0]
+                comment = x[1]
+                if tx_id == compare_txid:
+                    found = 1
+            if found == 1:
+                sendTweet(comment)
+            else:
+                #normal tweet
+                makeTweet(amount,memelord)
+                insertData(amount)
+                saveWallet()
+            time.sleep(5)
+            pass
+    except Exception as e:
+        raise e
+        with open(tweetFile, "a+") as f:
+            f.write(str(e))
+    print("hello  world")
+
 
 
 def formatAmount(amount):
@@ -187,6 +220,7 @@ def makeTweet(amount,memelord):
 
 def sendTweet(tweet):
     global consumer_key, consumer_secret, access_token, access_token_secret
+    global tweetFile
     # authentication of consumer key and secret
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     # authentication of access token and secret
@@ -197,6 +231,9 @@ def sendTweet(tweet):
     while True:
         try:
             api.update_status(status = tweet)
+            with open(tweetFile, "a+") as f:
+                f.write(tweet + "\n")
+            print(tweet)
             break
         except Exception as e:
             print(e)
@@ -206,14 +243,21 @@ def sendTweet(tweet):
 def saveWallet():
     #not sure how often the rpc wallet saves automatically 
     try:
-        rpc_connection = AuthServiceProxy(service_url='http://127.0.0.1:18084/json_rpc')
+        rpc_connection = AuthServiceProxy(service_url=node_url)
         rpc_connection.store()
         pass
-    except Exception as e:
+    except Exceptio:
         raise e
 
 def main(tx_id):
-    checkHeight(str(tx_id))
+    global tweetFile
+    try:
+        checkHeight(str(tx_id))
+        pass
+    except Exception:
+        with open(tweetFile, "a+") as f:
+            f.write(str(traceback.print_exc()) + "\n")
+    
 
 if __name__ == '__main__':
     tx_id = sys.argv[1]

@@ -140,13 +140,13 @@ def checkHeight(tx_id):
             pickle.dump( txList, open( pickled_data, "wb+" ) )
             #20 minutes
             logit("All aboard..")
-            time.sleep(10)
+            time.sleep(1200)
             #load
             txList = pickle.load( open( pickled_data, "rb" ) )
             #delete
             os.remove(pickled_data)
             logit(f"train leaving the station with {len(txList)} passengers")
-            time.sleep(20)
+            time.sleep(2400)
             validateInput(txList)
         else:
             #append to existing txList

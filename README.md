@@ -27,6 +27,8 @@ The webscraping method is a 'hack'. Outgoing transactions should ideally be disc
 
 If/when all outgoing transactions are disclosed, then an 'unofficial' monthly transparency report can be tweeted automatically e.g. ' ?xmr in, ?xmr out ' and to see what it was spent on you just have to scroll through the twitter feed.
 
+The original version of this script had a fixed rate of 1 transaction per website scrape.. a fixed block size if you will. This isn't Monero like at all, so i improved upon this by collecting transactions over a 20 minute window (dynamic blocksize?) so now there is only 1 website scrape every 20 minutes maximum for multiple transactions.
+
 # Like this idea and want to show some support?:
 
 This is a voluntary contribution to the Monero community, however, the machine that is running this script uses 20~watts of power so a few cents donation can literally help 'keep the lights on' :) 

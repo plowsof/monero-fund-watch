@@ -34,6 +34,6 @@ The original version of this script had a fixed rate of 1 transaction per websit
 This is a voluntary contribution to the Monero community, however, the machine that is running this script uses 20~watts of power so a few cents donation can literally help 'keep the lights on' :) 
 
 XMR Address
-'''
+
 86aSNJwDYC2AshDDvbGgtQ17RWspmKNwNXAqdFiFF2Db91v9PC26uDxffD9ZYfcMjvJpuKJepsQtELAdmXVk85E1DsuL6rG
-'''
+

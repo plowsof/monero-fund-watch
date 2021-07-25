@@ -2,7 +2,7 @@
 
 1. The viewkey for the Monero general fund is public, however, there are several steps involved with creating a view-only wallet and you can't just link someone to look at it (especially someone not involved with Monero).
 2. People who do create a view-only wallet will be confused by false inputs which are actually 'change' outputs from an outgoing transaction (which are disclosed on Moneros gitlab repository by @binaryFate.
-3. There was some unrest over 2020-2021 transparency report being 'late'.
+3. There was some unrest over 2020-2021 transparency report being 'late'. (people being unaware the wallet is public)
 
 # My proposed solutions:
 

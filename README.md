@@ -7,8 +7,8 @@
 # My proposed solutions:
 
 1. Tweet every donation that is received so people can simply visit the twitter account and scroll through its activity.
-2. Donation tweets will be delayed for 1 hour. This will give @binaryFate enough time to disclose any outgoing transactions on gitlab. If the input is found to be a change output - instead of tweeting the amount - binaryFates comment will be directly uploaded instead e.g. "Donating ?xmr to (some proposal) : (proposal link)."
-3. Because updates will be posted live, there will be less / no unrest for the yearly transparency report as updates will happen in near real time.
+2. Donation tweets will be delayed for 1 hour. This will give @binaryFate enough time to disclose any outgoing transactions on gitlab. If the input is found to be a change output - instead of tweeting the amount - binaryFates comment will be tweeted instead e.g. "Donating ?xmr to (some proposal) : (proposal link)."
+3. Because updates will be posted live, there will be less / no unrest for the yearly transparency report and it's a more convenient way of viewing the general fund wallet.
 
 # How i've solved this:
 
@@ -27,7 +27,7 @@ The webscraping method is a 'hack'. Outgoing transactions should ideally be disc
 
 If/when all outgoing transactions are disclosed, then an 'unofficial' monthly transparency report can be tweeted automatically e.g. ' ?xmr in, ?xmr out ' and to see what it was spent on you just have to scroll through the twitter feed.
 
-The original version of this script had a fixed rate of 1 transaction per website scrape.. a fixed block size if you will. This isn't Monero like at all, so i improved upon this by collecting transactions over a 20 minute window (dynamic blocksize?) so now there is only 1 website scrape every 20 minutes maximum for multiple transactions.
+The original version of this script had a fixed rate of 1 transaction per website scrape.. a fixed block size if you will. This isn't Monero like at all, so i improved upon this by collecting transactions over a 20 minute window (dynamic blocksize?) so now there is only 1 website scrape every 20 minutes maximum for n transactions.
 
 # Like this idea and want to show some support?:
 

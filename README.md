@@ -21,7 +21,7 @@
   
 # Problems:
 
-Contributions to ccs proposals are not the only outgoing transactions from the general fund (which cause the false change inputs) so for this script to validate all inputs - these payments need to be disclosed also e.g. "Withdrawing ?xmr from the general fund to purchase server bandwidth."
+Contributions to ccs proposals are not the only outgoing transactions from the general fund (which cause the false change inputs) so for this script to validate all inputs - these payments need to be disclosed also e.g. "Withdrawing ?xmr from the general fund to purchase server bandwidth." - this is now solved assuming none ccs related payments are posted in the Monero Matrix room.
 
 The webscraping method is a 'hack'. Outgoing transactions should ideally be disclosed in a simple text file somewhere that a script can easily parse
 

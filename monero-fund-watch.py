@@ -52,6 +52,7 @@ def requests_scrape_page():
     #print(soup.prettify())
     strings = soup.find_all(class_='event-body')
     count = 0
+    fatesPosts = []
     for each in strings:
         count+=1
         #print("item : " + str(count))
@@ -60,7 +61,6 @@ def requests_scrape_page():
         #comment = each.parent.find(class_='event-title').a['href']
         #print(f"data2: {ccs}")
         #print(f"data3: {comment}")
-        fatesPosts = []
         for word in comment.replace(".","").split(" "):
             if len(word) == 64:
                 print("gotem")
@@ -75,6 +75,36 @@ def requests_scrape_page():
                 data.append(data_comment)
                 fatesPosts.append(data)
                 #logit(data_comment)
+
+    #Search matrix chat and append to fatesPosts
+    matrix = MatrixHttpApi("https://matrix.org", token="-")
+    #response = matrix.send_message("!roomid:matrix.org", "Hello!")
+    age = 0
+    token = None
+    matrixPosts = []
+    while age <= 3600000:
+        moneroRoom = matrix.get_room_messages(room_id="!WzzKmkfUkXPHFERgvm:matrix.org",token=token, direction="b", limit=20, to=None)
+        for x in moneroRoom["chunk"]:
+            age = x["age"] #seems to be in MS
+            if "body" in x["content"]:
+                #print(x["content"]["body"])
+                #print(x["user_id"])
+                if x["user_id"] == "@binaryFate:libera.chat":
+                    comment = x["content"]["body"]
+                    #if its from binary fate
+                    #if it contains 64 len char = gotem
+                    for word in comment.replace(".","").split(" "):
+                        if len(word) == 64:
+                            data_txid = word
+                            data_comment = comment.replace(data_txid,"") #deletes the txid from comment
+                            data = []
+                            data.append(data_txid)
+                            data.append(data_comment)
+                            fatesPosts.append(data)
+        token = moneroRoom["end"]
+        time.sleep(1)
+    #pprint.pprint(fatesPosts)
+
     return fatesPosts
 
 def insertData(amount):
@@ -140,13 +170,13 @@ def checkHeight(tx_id):
             pickle.dump( txList, open( pickled_data, "wb+" ) )
             #20 minutes
             logit("All aboard..")
-            time.sleep(1200)
+            time.sleep(10)
             #load
             txList = pickle.load( open( pickled_data, "rb" ) )
             #delete
             os.remove(pickled_data)
             logit(f"train leaving the station with {len(txList)} passengers")
-            time.sleep(2400)
+            time.sleep(20)
             validateInput(txList)
         else:
             #append to existing txList
@@ -176,6 +206,8 @@ def validateInput(txList):
                 comment = x[1]
                 if tx_id == compare_txid:
                     found = 1
+                    #can be posted in multiple locations e.g. gitlab and matrix so pass on the 1st
+                    pass
             if found == 1:
                 sendTweet(comment)
             else:

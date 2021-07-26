@@ -17,6 +17,7 @@ import os
 import requests
 from bs4 import BeautifulSoup
 import pprint
+from matrix_client.api import MatrixHttpApi
 
 #from pyvirtualdisplay import Display
 import traceback 
@@ -153,7 +154,7 @@ def checkHeight(tx_id):
         except Exception as e:
             logit(e)
             print("Retrying connection in 5 seconds.")
-            time.sleep(5)
+            time.sleep(1200)
 
     height = info["transfer"]["height"]
     logit(f"height: {height}")
@@ -170,7 +171,7 @@ def checkHeight(tx_id):
             pickle.dump( txList, open( pickled_data, "wb+" ) )
             #20 minutes
             logit("All aboard..")
-            time.sleep(10)
+            time.sleep(2400)
             #load
             txList = pickle.load( open( pickled_data, "rb" ) )
             #delete
@@ -207,7 +208,7 @@ def validateInput(txList):
                 if tx_id == compare_txid:
                     found = 1
                     #can be posted in multiple locations e.g. gitlab and matrix so pass on the 1st
-                    pass
+                    break
             if found == 1:
                 sendTweet(comment)
             else:

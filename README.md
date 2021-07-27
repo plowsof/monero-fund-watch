@@ -13,9 +13,7 @@
 # How i've solved this:
 
 - use tx-notify from monero-wallet-rpc to run a python script when incoming transactions are received.
-- use a webscraper to check binaryFates recent activity on gitlab.
-- get last 1 hour of activity from the monero community matrix room.
-- check if the tx id was posted by BinaryFate
+- check if the tx id was posted by BinaryFate (on gitlab or in the Matrix Monero room.
 - send the tweet.
 - https://twitter.com/WatchFund/
   

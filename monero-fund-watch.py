@@ -2,7 +2,6 @@
 #delayed donation updates 1 hour to check for change outputs
 import sys
 from monerorpc.authproxy import AuthServiceProxy, JSONRPCException
-from pprint import pprint
 import tweepy
 import emoji
 import json

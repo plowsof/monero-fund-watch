@@ -237,8 +237,14 @@ def formatAmount(amount):
         s = '0' * (CRYPTONOTE_DISPLAY_DECIMAL_POINT + 1 - len(s)) + s
     idx = len(s) - CRYPTONOTE_DISPLAY_DECIMAL_POINT
     s = s[0:idx] + "." + s[idx:]
-    #https://stackoverflow.com/questions/5807952/removing-trailing-zeros-in-python
-    return str(float(s))
+    #my own method to remove trailing 0's, and to fix the 1.1e-5 etc
+    trailing = 0
+    while trailing == 0:
+        if s[-1:] == "0":
+            s = s[:-1]
+        else:
+            trailing = 1
+    return s
 
 def makeTweet(amount,memelord):
     fiatValue = getPrice("XMR",amount)

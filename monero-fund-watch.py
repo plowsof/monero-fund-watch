@@ -252,6 +252,9 @@ def makeTweet(amount,memelord):
     #check fiat value for memelord status
     if "420" in str(fiatValue) or "69" in str(fiatValue):
         memelord = 1
+    #Whale alert !
+    if float(fiatValue) == 0.00:
+        tweet += emoji.emojize(' :whale: :police_car_light:')
     if memelord == 1:
         tweet += emoji.emojize(' :winking_face:')
     sendTweet(tweet)

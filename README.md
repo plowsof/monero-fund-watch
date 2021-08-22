@@ -38,5 +38,5 @@ XMR Address
 86aSNJwDYC2AshDDvbGgtQ17RWspmKNwNXAqdFiFF2Db91v9PC26uDxffD9ZYfcMjvJpuKJepsQtELAdmXVk85E1DsuL6rG
 
 # Thank you
-A kind stranger who wishes to be known as TheKindGerman has donated enough to pay for 1 whole year of electricity ! :') up to 2021-08-22. 
+A kind stranger who wishes to be known as TheKindGerman has donated enough XMR to pay for 1 whole year of electricity ! :') up to 2021-08-22. 
 

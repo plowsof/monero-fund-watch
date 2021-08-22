@@ -37,3 +37,5 @@ XMR Address
 
 86aSNJwDYC2AshDDvbGgtQ17RWspmKNwNXAqdFiFF2Db91v9PC26uDxffD9ZYfcMjvJpuKJepsQtELAdmXVk85E1DsuL6rG
 
+Thanks to a kind stranger who wishes to be known as TheKindGerman, i have 1 whole year of electricity paid for :') up to 2021-08-22. 
+

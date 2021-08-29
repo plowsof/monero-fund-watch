@@ -32,7 +32,7 @@ pickled_data = "/var/log/monero/pickled_data.pkl"
 node_url =  'http://127.0.0.1:18084/json_rpc'
 loc_db = "/var/log/monero/general-fund.db"
 tweetFile = "/var/log/monero/tweet"
-
+blockchain_explorer = "https://www.exploremonero.com/transaction/"
 def logit(sometext):
     global tweetFile
     with open(tweetFile, "a+") as f:
@@ -247,6 +247,7 @@ def formatAmount(amount):
     return s
 
 def makeTweet(amount,memelord):
+    global blockchain_explorer
     fiatValue = getPrice("XMR",amount)
     tweet = emoji.emojize(f':heart_with_ribbon: +{amount} #xmr :heart_with_ribbon: ${fiatValue}')
     #check fiat value for memelord status
@@ -257,6 +258,7 @@ def makeTweet(amount,memelord):
         tweet += emoji.emojize(' :whale: :police_car_light:')
     if memelord == 1:
         tweet += emoji.emojize(' :winking_face:')
+    tweet += f"\n\n{blockchain_explorer}" + tx_id
     sendTweet(tweet)
 
 def sendTweet(tweet):

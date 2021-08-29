@@ -209,7 +209,7 @@ def validateInput(txList):
                     #can be posted in multiple locations e.g. gitlab and matrix so pass on the 1st
                     break
             if found == 1:
-                sendTweet(comment)
+                sendTweet(comment,1)
             else:
                 #normal tweet
                 makeTweet(amount,memelord)
@@ -261,7 +261,7 @@ def makeTweet(amount,memelord):
     tweet += f"\n\n{blockchain_explorer}" + tx_id
     sendTweet(tweet)
 
-def sendTweet(tweet):
+def sendTweet(tweet,url_preview=0):
     global consumer_key, consumer_secret, access_token, access_token_secret
     global tweetFile
     # authentication of consumer key and secret
@@ -273,7 +273,10 @@ def sendTweet(tweet):
     #tweepy.error.TweepError: [{'code': 187, 'message': 'Status is a duplicate.'}]
     while True:
         try:
-            api.update_status(status = tweet)
+            if url_preview == 1:
+                api.update_status(status = tweet, uri_card='tombstone://card')
+            else:
+                api.update_status(status = tweet)
             with open(tweetFile, "a+") as f:
                 f.write(tweet + "\n")
             print(tweet)

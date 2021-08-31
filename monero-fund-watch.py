@@ -33,6 +33,8 @@ node_url =  'http://127.0.0.1:18084/json_rpc'
 loc_db = "/var/log/monero/general-fund.db"
 tweetFile = "/var/log/monero/tweet"
 blockchain_explorer = "https://www.exploremonero.com/transaction/"
+loc_lat = -4.6796
+loc_long = 55.4920
 def logit(sometext):
     global tweetFile
     with open(tweetFile, "a+") as f:
@@ -264,6 +266,7 @@ def makeTweet(amount,memelord):
 def sendTweet(tweet,url_preview=0):
     global consumer_key, consumer_secret, access_token, access_token_secret
     global tweetFile
+    global loc_lat, loc_long
     # authentication of consumer key and secret
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     # authentication of access token and secret
@@ -274,9 +277,9 @@ def sendTweet(tweet,url_preview=0):
     while True:
         try:
             if url_preview == 1:
-                api.update_status(status = tweet, uri_card='tombstone://card')
+                api.update_status(status = tweet, card_uri='tombstone://card', lat=loc_lat, long=loc_long, display_coordinates=1)
             else:
-                api.update_status(status = tweet)
+                api.update_status(status = tweet, lat=loc_lat, long=loc_long, display_coordinates=1)
             with open(tweetFile, "a+") as f:
                 f.write(tweet + "\n")
             print(tweet)

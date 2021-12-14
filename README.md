@@ -41,5 +41,5 @@ XMR Address
 A kind stranger who wishes to be known as TheKindGerman has donated enough XMR to pay for 1 whole year of electricity ! :') up to 2021-08-22. 
 Another 2 anonymous donations.. thats about 2 years and 6 months!! (i cant believe it)  
 
-##Update
+## Update
 I am trying out a Mastodon mirror here https://mastodon.social/web/@fundwatch

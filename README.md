@@ -43,3 +43,4 @@ Another 2 anonymous donations.. thats about 2 years and 6 months!! (i cant belie
 
 ## Update
 I am trying out a Mastodon mirror here https://mastodon.social/web/@fundwatch
+## Mastodon account suspended due to "spam" ^ (i guess people donate too much to the general fund eh?)

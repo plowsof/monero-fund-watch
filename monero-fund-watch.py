@@ -43,13 +43,20 @@ def logit(sometext):
 def requests_scrape_page():
     global binaryFate_url
     global ccs_url
-    myDict = {
-    'accept': 'application/json, text/plain, */*',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36',
-    'x-requested-with': 'XMLHttpRequest'
-    }
-    r=requests.get(binaryFate_url, headers=myDict).text
-    someDict = json.loads(r)
+    while True:
+        try:
+            myDict = {
+                'accept': 'application/json, text/plain, */*',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36',
+                'x-requested-with': 'XMLHttpRequest'
+                }
+            r=requests.get(binaryFate_url, headers=myDict).text
+            pprint.pprint(r)
+            someDict = json.loads(r)
+            break
+        except:
+            time.sleep(2)
+            print("failed to download page")
     soup = BeautifulSoup(someDict['html'], 'html.parser')
     #print(soup.prettify())
     strings = soup.find_all(class_='event-body')
@@ -76,18 +83,23 @@ def requests_scrape_page():
                 data.append(data_txid)
                 data.append(data_comment)
                 fatesPosts.append(data)
+                #pprint.pprint(fatesPosts)
                 #logit(data_comment)
 
     #Search matrix chat and append to fatesPosts
-    matrix = MatrixHttpApi("https://matrix.org", token="-")
-    #response = matrix.send_message("!roomid:matrix.org", "Hello!")
-    age = 0
+    matrix = MatrixHttpApi("https://matrix.org", token="syt_cGxvd3NvZg_QAbIgvAtIbidLSMmTCfU_2PerS4")
     token = None
+    moneroRoom = matrix.get_room_messages(room_id="!WzzKmkfUkXPHFERgvm:matrix.org",token=token, direction="b", limit=20, to=None)
+    hour_history = int(moneroRoom["chunk"][0]["origin_server_ts"])
+    age = hour_history
+    hour_history = (hour_history - 3600000)
     matrixPosts = []
-    while age <= 3600000:
-        moneroRoom = matrix.get_room_messages(room_id="!WzzKmkfUkXPHFERgvm:matrix.org",token=token, direction="b", limit=20, to=None)
+    while age > hour_history:
         for x in moneroRoom["chunk"]:
-            age = x["age"] #seems to be in MS
+            age = x["origin_server_ts"] #seems to be in MS
+            print(f"age now: {age} hour_history {hour_history}")
+            if age < hour_history:
+              break
             if "body" in x["content"]:
                 #print(x["content"]["body"])
                 #print(x["user_id"])
@@ -105,8 +117,8 @@ def requests_scrape_page():
                             fatesPosts.append(data)
         token = moneroRoom["end"]
         time.sleep(1)
+        moneroRoom = matrix.get_room_messages(room_id="!WzzKmkfUkXPHFERgvm:matrix.org",token=token, direction="b", limit=20, to=None)
     #pprint.pprint(fatesPosts)
-
     return fatesPosts
 
 def insertData(amount):

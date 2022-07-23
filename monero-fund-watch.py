@@ -2,6 +2,7 @@
 #delayed donation updates 1 hour to check for change outputs
 import sys
 from monerorpc.authproxy import AuthServiceProxy, JSONRPCException
+from pprint import pprint
 import tweepy
 import emoji
 import json
@@ -15,32 +16,46 @@ import pickle
 import os
 import requests
 from bs4 import BeautifulSoup
+import json
 import pprint
 from matrix_client.api import MatrixHttpApi
+
+import asyncio
+
+m_access_token = ""
+instance = ""
 
 #from pyvirtualdisplay import Display
 import traceback 
 ccs_url = "https://repo.getmonero.org/monero-project/ccs-proposals/-/merge_requests/"
 binaryFate_url = "https://repo.getmonero.org/users/binaryFate/activity?limit=20&offset=0"
 #binaryFate_url = "https://repo.getmonero.org/users/binaryFate"
-cryptocompare.cryptocompare._set_api_key_parameter("-")
-consumer_key ="-"
-consumer_secret ="-"
-access_token ="-"
-access_token_secret ="-"
+cryptocompare.cryptocompare._set_api_key_parameter("44ecd590024044271c33b1ad36529f2d5b90773a3454906c0aece462b95042c6")
+
+consumer_key = ""
+consumer_secret = ""
+access_token = ""
+access_token_secret = ""
+
 pickled_data = "/var/log/monero/pickled_data.pkl"
-node_url =  'http://127.0.0.1:18084/json_rpc'
+node_url =  'http://localhost:18084/json_rpc'
 loc_db = "/var/log/monero/general-fund.db"
 tweetFile = "/var/log/monero/tweet"
 blockchain_explorer = "https://www.exploremonero.com/transaction/"
-loc_lat = -4.6796
 loc_long = 55.4920
+loc_lat = -4.6796
+'''
+pickled_data = "pickled_data.pkl"
+node_url =  'http://localhost:18084/json_rpc'
+loc_db = "general-fund.db"
+tweetFile = "tweet"
+'''
 def logit(sometext):
     global tweetFile
     with open(tweetFile, "a+") as f:
         f.write(str(sometext) + "\n")
-
-def requests_scrape_page():
+        
+def requests_scrape_page(txList):
     global binaryFate_url
     global ccs_url
     while True:
@@ -51,7 +66,7 @@ def requests_scrape_page():
                 'x-requested-with': 'XMLHttpRequest'
                 }
             r=requests.get(binaryFate_url, headers=myDict).text
-            pprint.pprint(r)
+            #pprint.pprint(r)
             someDict = json.loads(r)
             break
         except:
@@ -70,16 +85,28 @@ def requests_scrape_page():
         #comment = each.parent.find(class_='event-title').a['href']
         #print(f"data2: {ccs}")
         #print(f"data3: {comment}")
+        headlist = []
+        #print("Hello")
+        #pprint.pprint(txList)
+        for tx in txList:
+            headlist.append(tx[0][0:6])
+        pprint.pprint(headlist)
         for word in comment.replace(".","").split(" "):
-            if len(word) == 64:
+            if len(word) < 6:
+                continue
+            if word[0:6] in headlist:
                 print("gotem")
+                #print(word)
                 #this is most likely a txid
                 data_txid = word
                 data_ccsid = ccs.replace("!","")
                 #trailing space to avoid any connected dots that break the link
                 actual_ccs = ccs_url+str(data_ccsid)+" " 
-                data_comment = comment.replace(data_txid,actual_ccs)
+                data_comment = comment.replace(data_txid,actual_ccs).replace("...","")
                 data = []
+                #print(data_comment)
+                #print(data_txid)
+                #print(data_comment)
                 data.append(data_txid)
                 data.append(data_comment)
                 fatesPosts.append(data)
@@ -166,8 +193,9 @@ def checkHeight(tx_id):
             break
         except Exception as e:
             logit(e)
+            print(e)
             print("Retrying connection in 5 seconds.")
-            time.sleep(1200)
+            time.sleep(5)
 
     height = info["transfer"]["height"]
     logit(f"height: {height}")
@@ -184,13 +212,15 @@ def checkHeight(tx_id):
             pickle.dump( txList, open( pickled_data, "wb+" ) )
             #20 minutes
             logit("All aboard..")
-            time.sleep(2400)
+            time.sleep(1200)
+            #time.sleep(5)
             #load
             txList = pickle.load( open( pickled_data, "rb" ) )
             #delete
             os.remove(pickled_data)
             logit(f"train leaving the station with {len(txList)} passengers")
-            time.sleep(20)
+            time.sleep(2400)
+            #time.sleep(5)
             validateInput(txList)
         else:
             #append to existing txList
@@ -204,10 +234,10 @@ def checkHeight(tx_id):
 def validateInput(txList):
     global tweetFile
     try:
-        #fatesPosts = scrape_page()
-        fatesPosts = requests_scrape_page()
+        fatesPosts = requests_scrape_page(txList)
+        pprint.pprint(fatesPosts)
         for x in txList:
-            tx_id = x[0]
+            tx_id = x[0][0:6]
             raw_amount = x[1]
             memelord = 0
             if "420" in str(raw_amount) or "69" in str(raw_amount):
@@ -218,11 +248,12 @@ def validateInput(txList):
             for x in fatesPosts:
                 compare_txid = x[0]
                 comment = x[1]
-                if tx_id == compare_txid:
+                #print(f"Is {tx_id} == {compare_txid}")
+                if tx_id in compare_txid:
                     found = 1
-                    #can be posted in multiple locations e.g. gitlab and matrix so pass on the 1st
                     break
             if found == 1:
+                pass
                 sendTweet(comment,1)
             else:
                 #normal tweet
@@ -251,7 +282,7 @@ def formatAmount(amount):
         s = '0' * (CRYPTONOTE_DISPLAY_DECIMAL_POINT + 1 - len(s)) + s
     idx = len(s) - CRYPTONOTE_DISPLAY_DECIMAL_POINT
     s = s[0:idx] + "." + s[idx:]
-    #my own method to remove trailing 0's, and to fix the 1.1e-5 etc
+    #my own hack to remove trailing 0's, and to fix the 1.1e-5 etc
     trailing = 0
     while trailing == 0:
         if s[-1:] == "0":
@@ -267,18 +298,18 @@ def makeTweet(amount,memelord):
     #check fiat value for memelord status
     if "420" in str(fiatValue) or "69" in str(fiatValue):
         memelord = 1
-    #Whale alert !
     if float(fiatValue) == 0.00:
         tweet += emoji.emojize(' :whale: :police_car_light:')
     if memelord == 1:
         tweet += emoji.emojize(' :winking_face:')
     tweet += f"\n\n{blockchain_explorer}" + tx_id
     sendTweet(tweet)
+    print(f"TWEETED {tweet}")
 
 def sendTweet(tweet,url_preview=0):
     global consumer_key, consumer_secret, access_token, access_token_secret
     global tweetFile
-    global loc_lat, loc_long
+    global loc_long, loc_lat
     # authentication of consumer key and secret
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     # authentication of access token and secret
@@ -288,18 +319,24 @@ def sendTweet(tweet,url_preview=0):
     #tweepy.error.TweepError: [{'code': 187, 'message': 'Status is a duplicate.'}]
     while True:
         try:
-            if url_preview == 1:
-                api.update_status(status = tweet, card_uri='tombstone://card', lat=loc_lat, long=loc_long, display_coordinates=1)
+            if url_preview == 0:
+                api.update_status(status = tweet, card_uri='tombstone://card', long=loc_long, lat=loc_lat, display_coordinates=1 )
             else:
-                api.update_status(status = tweet, lat=loc_lat, long=loc_long, display_coordinates=1)
+                api.update_status(status = tweet, lat=loc_lat, long=loc_long, display_coordinates=1 )
             with open(tweetFile, "a+") as f:
                 f.write(tweet + "\n")
             print(tweet)
+            #asyncio.run(mastodon_toot(tweet))
             break
         except Exception as e:
             print(e)
             tweet += " " + random.choice(string.ascii_letters)
-            time.sleep(1)
+            time.sleep(60)
+
+async def mastodon_toot(msg):
+    global m_access_token, instance
+    async with atoot.client(instance, access_token=m_access_token) as c:
+        await c.create_status(status=msg)
 
 def saveWallet():
     #not sure how often the rpc wallet saves automatically 
@@ -313,6 +350,8 @@ def saveWallet():
 def main(tx_id):
     global tweetFile
     try:
+        with open(tweetFile, "a+") as f:
+            f.write("We have been called!\n")
         checkHeight(str(tx_id))
         pass
     except Exception:
@@ -321,12 +360,14 @@ def main(tx_id):
     
 
 if __name__ == '__main__':
+    #logit("ok some sanity")
     tx_id = sys.argv[1]
+    #tx_id = "7d11dcef0c2608ecd099cd689c0e0a010841a399014a35a153e6bf5430a1f011"
     main(tx_id)
-
+    #asyncio.run(mastodon_toot("hello"))
 '''
 sqlite> create table main (
    ...> amount INTEGER NOT NULL,
    ...> date_time TEXT NOT NULL
-   ...> );
-'''
+   ...> '''
+

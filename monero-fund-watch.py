@@ -30,7 +30,7 @@ import traceback
 ccs_url = "https://repo.getmonero.org/monero-project/ccs-proposals/-/merge_requests/"
 binaryFate_url = "https://repo.getmonero.org/users/binaryFate/activity?limit=20&offset=0"
 #binaryFate_url = "https://repo.getmonero.org/users/binaryFate"
-cryptocompare.cryptocompare._set_api_key_parameter("44ecd590024044271c33b1ad36529f2d5b90773a3454906c0aece462b95042c6")
+cryptocompare.cryptocompare._set_api_key_parameter("")
 
 consumer_key = ""
 consumer_secret = ""
